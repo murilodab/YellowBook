@@ -1,10 +1,10 @@
 :root {
-    --cf-primaryColor: #0869b8;
-    --cf-primaryColorDark: #002a4e;
-    --cf-primaryColorLight: #edf5fc;
-    --cf-secondaryColor: #fff0d9;
-    --cf-secondaryColorLight: #FFF8EC;
-    --cf-dark-color: #131313;
+    --cf-primaryColor: #f9d924;
+    --cf-primaryColorDark: #646464;
+    --cf-primaryColorLight: #dcca77;
+    --cf-secondaryColor: #12110f;
+    --cf-secondaryColorLight: #6e5e14;
+    --cf-dark-color: #393e46;
     --cf-light-gray: #d9d9d9;
     --cf-light-color: #eeeeee;
     --cf-title-font: 'Fira Sans', sans-serif;
