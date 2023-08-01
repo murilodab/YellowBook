@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<AppUser> SignInManager
+
+<!DOCTYPE html>
 <html lang="en" class="h-100">
 <head>
 
@@ -29,9 +33,9 @@
     <header>
         <!--NEW NAVBAR-->
 
-        <nav class="navbar navbar-expand-md navbar-light fixed-top border-bottom border-light navShadow">
+        <nav class="navbar navbar-expand-md navbar-dark text-light fixed-top  navShadow">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="/img/ContactPro.png" height=45></a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="/img/YellowList-banner.png" height=45></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                         aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -41,12 +45,16 @@
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Contacts" asp-action="Index">Contacts</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">Categories</a>
-                        </li>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Contacts" asp-action="Index">Contacts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">Categories</a>
+                            </li>
+                        }
+                       
                     </ul>
                     <partial name="_LoginPartial" /> @*Generates Login and Register*@
                 </div>
@@ -103,7 +111,7 @@
                         &copy; 2023 Murilo Barbosa All Rights Reserved
                     </div>
                     <div class="col d-flex justify-content-center">
-                        <img src="/img/ContactPro.png" height="50">
+                        <img src="/img/YellowList-banner.png" height="50">
                     </div>
                     <div class="col-12 col-md d-flex justify-content-center justify-content-md-end">
                         <a href="https://www.linkedin.com/in/murilo-barbosa-55ab1492/" target="_blank" class="socialicons"><i class="bi bi-linkedin p-2 "></i></a>

@@ -30,15 +30,15 @@ body {
 /*--Button Overrides --*/
 /*-- Button styles override Bootstrap Styles --*/
 .btn-outline-primary {
-    color: var(--cf-dark-color);
+    color: var(--cf-primaryColor);
     border-color: var(--cf-primaryColor) !important;
 }
 
     .btn-outline-primary:hover,
     .btn-outline-primary:active,
     .btn-outline-primary:focus {
-        border-color: var(--cf-secondaryColor) !important;
-        background-color: var(--cf-primaryColor);
+        border-color: white !important;
+        background-color: var(--cf-secondaryColor);
     }
 
 .btn-primary {
@@ -63,7 +63,7 @@ body {
 }
 
 nav {
-    background-color: var(--cf-primaryColorLight)
+    background-color: var(--cf-secondaryColor)
 }
 
 h1,
