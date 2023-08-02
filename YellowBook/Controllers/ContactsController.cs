@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using YellowBook.Data;
 using YellowBook.Models;
+using YellowBook.Enums;
+using YellowBook.Services.Interfaces;
+using YellowBook.Services;
 
 namespace YellowBook.Controllers
 {
@@ -16,9 +19,21 @@ namespace YellowBook.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public ContactsController(ApplicationDbContext context)
+        private readonly UserManager<AppUser> _userManager;
+
+        private readonly IImageService _imageService;
+
+        private readonly IAddressBookService _addressBookService;
+
+        public ContactsController(ApplicationDbContext context, 
+                                    UserManager<AppUser> userManager,
+                                    IImageService imageService,
+                                    IAddressBookService addressBookService)
         {
             _context = context;
+            _userManager = userManager;
+            _imageService = imageService;
+            _addressBookService = addressBookService;
         }
 
         // GET: Contacts
@@ -51,9 +66,12 @@ namespace YellowBook.Controllers
 
         // GET: Contacts/Create
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
+            string appUserId = _userManager.GetUserId(User);
+
+            ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
+            ViewData["CategoryList"] = new MultiSelectList(await _addressBookService.GetUserCategoriesAsync(appUserId), "Id", "Name");
             return View();
         }
 
@@ -62,16 +80,34 @@ namespace YellowBook.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AppUserId,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType")] Contact contact)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageFile")] Contact contact)
         {
+            ModelState.Remove("AppUserId");
+            ModelState.Remove("Created");
+
             if (ModelState.IsValid)
             {
+                contact.AppUserId = _userManager.GetUserId(User);
+                contact.Created = DateTime.UtcNow;
+
+                if (contact.BirthDate != null)
+                {
+                    contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
+
+                }
+
+                if(contact.ImageFile != null)
+                {
+                    contact.ImageData = await _imageService.ConvertFileToByteArrayAsync(contact.ImageFile);
+                    contact.ImageType = contact.ImageFile.ContentType;
+                }
+
                 _context.Add(contact);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
-            return View(contact);
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Contacts/Edit/5

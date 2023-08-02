@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using YellowBook.Data;
 using YellowBook.Models;
+using YellowBook.Services;
+using YellowBook.Services.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,12 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddRazorPages()
     .AddRazorRuntimeCompilation();
+
+//Custom Services
+
+builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddScoped<IAddressBookService, AddressBookService>();
 
 var app = builder.Build();
 
