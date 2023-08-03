@@ -10,7 +10,7 @@ namespace YellowBook.Services
         private readonly string defaultImage = "img/DefaultContactImage.png";
         
         
-        public string ConverteByteArrayToFile(byte[] fileData, string extension)
+        public string ConvertByteArrayToFile(byte[] fileData, string extension)
         {
             if (fileData is null) return defaultImage;
             

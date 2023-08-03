@@ -3,7 +3,7 @@
     public interface IImageService
     {
         public Task<byte[]> ConvertFileToByteArrayAsync(IFormFile file);
-        public String ConverteByteArrayToFile(byte[] fileData, string extension);
+        public String ConvertByteArrayToFile(byte[] fileData, string extension);
 
 
 
