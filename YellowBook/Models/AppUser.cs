@@ -20,6 +20,7 @@ namespace YellowBook.Models
         [NotMapped]
         public string? FullName { get { return $"{FirstName} {LastName}"; } }
 
+
     }
 
 }

@@ -33,10 +33,9 @@
             </div>
         </form>
     </div>
-
     <div class="col-12 col-md-8">
         <div class="row row-cols-1 g-3">
-            @foreach (var contact in Model)
+            @foreach(var contact in Model)
             {
                 <div class="col">
                     <div class="card mb-3">
@@ -46,17 +45,17 @@
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h5 class="card-title">@Html.DisplayNameFor(modelItem => contact.FullName)</h5>
+                                    <h5 class="card-title">@contact.FullName</h5>
                                     <address class="card-text">
-                                        @Html.DisplayNameFor(modelItem => contact.Address1)<br>
-                                        @Html.DisplayNameFor(modelItem => contact.Address2)<br>
-                                        @Html.DisplayNameFor(modelItem => contact.City),@Html.DisplayNameFor(modelItem => contact.State) @Html.DisplayNameFor(modelItem => contact.ZipCode)
+                                        @Html.DisplayFor(modelItem => contact.Address1)<br>
+                                        @Html.DisplayFor(modelItem => contact.Address2)<br>
+                                        @Html.DisplayFor(modelItem => contact.City),@Html.DisplayFor(modelItem => contact.State) @Html.DisplayFor(modelItem => contact.ZipCode)
                                     </address>
                                     <div class="card-text">
-                                        <span class="fw-bold me-2">Phone:</span>@Html.DisplayNameFor(modelItem => contact.PhoneNumber)
+                                        <span class="fw-bold me-2">Phone:</span>@Html.DisplayFor(modelItem => contact.PhoneNumber)
                                     </div>
                                     <div class="card-text">
-                                        <span class="fw-bold me-2">Email:</span>@Html.DisplayNameFor(modelItem => contact.Email)
+                                        <span class="fw-bold me-2">Email:</span>@Html.DisplayFor(modelItem => contact.Email)
                                     </div>
                                     <div class="fs-4">
                                         <a class="me-3 editIcons" asp-action="Edit" asp-route-id="@contact.Id"><i class="bi bi-pencil-fill "></i></a>
