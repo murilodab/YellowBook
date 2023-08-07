@@ -7,12 +7,15 @@ namespace YellowBook.Services
     public class ImageService : IImageService
     {
         private readonly string[] suffixes = { "Bytes", "KB", "MB", "GB", "TB", "PB" };
-        private readonly string defaultImage = "img/DefaultContactImage.png";
+        private readonly string defaultImage = "/img/DefaultContactImage.png";
         
         
         public string ConvertByteArrayToFile(byte[] fileData, string extension)
         {
-            if (fileData is null) return defaultImage;
+            if (fileData is null)
+            {
+                return defaultImage;
+            }
             
             try
             {

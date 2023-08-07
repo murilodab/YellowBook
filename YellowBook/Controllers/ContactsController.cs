@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using YellowBook.Data;
 using YellowBook.Models;
+using YellowBook.Models.ViewModels;
 using YellowBook.Enums;
 using YellowBook.Services.Interfaces;
 using YellowBook.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace YellowBook.Controllers
 {
@@ -25,21 +27,26 @@ namespace YellowBook.Controllers
 
         private readonly IAddressBookService _addressBookService;
 
-        public ContactsController(ApplicationDbContext context, 
+        private readonly IEmailSender _emailService;
+
+        public ContactsController(ApplicationDbContext context,
                                     UserManager<AppUser> userManager,
                                     IImageService imageService,
-                                    IAddressBookService addressBookService)
+                                    IAddressBookService addressBookService,
+                                    IEmailSender emailService)
         {
             _context = context;
             _userManager = userManager;
             _imageService = imageService;
             _addressBookService = addressBookService;
+            _emailService = emailService;
         }
 
         // GET: Contacts
         [Authorize]
-        public async Task<IActionResult> Index(int categoryId)
+        public async Task<IActionResult> Index(int categoryId, string swalMessage = null)
         {
+            ViewData["SwalMessage"] = swalMessage;
             var contacts = new List<Contact?>();
             string appUserId = _userManager.GetUserId(User);
 
@@ -48,9 +55,9 @@ namespace YellowBook.Controllers
                                       .Include(c => c.Contacts)
                                       .ThenInclude(c => c.Categories)
                                       .FirstOrDefault(u => u.Id == appUserId);
-            
+
             var categories = appUser.Categories;
-            if(categoryId == 0)
+            if (categoryId == 0)
             {
                 contacts = appUser.Contacts.OrderBy(c => c!.LastName)
                                        .ThenBy(c => c!.FirstName)
@@ -65,13 +72,96 @@ namespace YellowBook.Controllers
                                              .ToList();
             }
 
-            
+
 
             ViewData["CategoryId"] = new SelectList(categories, "Id", "Name", categoryId);
 
             return View(contacts);
         }
 
+        [Authorize]
+        public IActionResult SearchContacts(string searchString)
+        {
+            string appUserId = _userManager.GetUserId(User);
+
+            var contacts = new List<Contact>();
+
+            AppUser? appUser = _context.Users
+                                      .Include(c => c.Contacts)
+                                      .ThenInclude(c => c.Categories)
+                                      .FirstOrDefault(u => u.Id == appUserId);
+            if (String.IsNullOrEmpty(searchString))
+            {
+                contacts = appUser.Contacts
+                                   .OrderBy(c => c.LastName)
+                                   .ThenBy(c => c.FirstName)
+                                   .ToList();
+            }
+            else
+            {
+                contacts = appUser.Contacts.Where(c => c.FullName!.ToLower().Contains(searchString.ToLower()))
+                                   .OrderBy(c => c.LastName)
+                                   .ThenBy(c => c.FirstName)
+                                   .ToList();
+            }
+
+            ViewData["CategoryId"] = new SelectList(appUser.Categories, "Id", "Name", 0);
+
+            return View(nameof(Index), contacts);
+        }
+
+        [Authorize]
+
+        public async Task<IActionResult> EmailContact(int contactId)
+        {
+            string appUserId = _userManager.GetUserId(User);
+            Contact contact = await _context.Contacts.Where(c => c.Id == contactId && c.AppUserId == appUserId)
+                                                     .FirstOrDefaultAsync();
+            if (contact == null)
+            {
+                return NotFound();
+            }
+
+            EmailData emailData = new EmailData()
+            {
+                EmailAddress = contact.Email,
+                FirstName = contact.FirstName,
+                LastName = contact.LastName
+            };
+
+            EmailContactViewModel model = new EmailContactViewModel()
+            {
+                Contact = contact,
+                EmailData = emailData
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> EmailContact(EmailContactViewModel ecvm)
+
+
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors);
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _emailService.SendEmailAsync(ecvm.EmailData.EmailAddress, ecvm.EmailData.Subject, ecvm.EmailData.Body);
+                    return RedirectToAction("Index", "Contacts", new {swalMessage = "Success: Email Sent!"});
+
+                }
+                catch
+                {
+                    return RedirectToAction("Index", "Contacts", new { swalMessage = "Error: Email Send Failed!" });
+                    throw;
+                }
+            
+            }
+            return View(ecvm);
+        }
 
         // GET: Contacts/Details/5
         [Authorize]
@@ -125,7 +215,7 @@ namespace YellowBook.Controllers
 
                 }
 
-                if(contact.ImageFile != null)
+                if (contact.ImageFile != null)
                 {
                     contact.ImageData = await _imageService.ConvertFileToByteArrayAsync(contact.ImageFile);
                     contact.ImageType = contact.ImageFile.ContentType;
@@ -158,12 +248,22 @@ namespace YellowBook.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.Contacts.FindAsync(id);
+            string appUserId = _userManager.GetUserId(User);
+
+            //var contact = await _context.Contacts.FindAsync(id);
+
+            var contact = await _context.Contacts.Where(c => c.Id == id && c.AppUserId == appUserId)
+                                                 .FirstOrDefaultAsync();
+
             if (contact == null)
             {
                 return NotFound();
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
+
+            ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
+            ViewData["CategoryList"] = new MultiSelectList(await _addressBookService.GetUserCategoriesAsync(appUserId), "Id", "Name", await _addressBookService.GetContactCategoryIdsAsync(contact.Id));
+
+
             return View(contact);
         }
 
@@ -172,7 +272,7 @@ namespace YellowBook.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,AppUserId,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,Created,ImageData,ImageType")] Contact contact)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,AppUserId,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,Created,ImageFile,ImageData,ImageType")] Contact contact, List<int> CategoryList)
         {
             if (id != contact.Id)
             {
@@ -183,8 +283,38 @@ namespace YellowBook.Controllers
             {
                 try
                 {
+                    if (contact.Created != null)
+                    {
+                        contact.Created = DateTime.SpecifyKind(contact.Created.Value, DateTimeKind.Utc);
+                    }
+
+                    if (contact.BirthDate != null)
+                    {
+                        contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
+                    }
+
+                    if (contact.ImageFile != null)
+                    {
+                        contact.ImageData = await _imageService.ConvertFileToByteArrayAsync(contact.ImageFile);
+                        contact.ImageType = contact.ImageFile.ContentType;
+                    }
+
                     _context.Update(contact);
                     await _context.SaveChangesAsync();
+
+                    //save our categories
+                    //remove the current categories
+                    List<Category> oldCategories = (await _addressBookService.GetContactCategoriesAsync(contact.Id)).ToList();
+                    foreach (var category in oldCategories)
+                    {
+                        await _addressBookService.RemoveContactFromCategoryAsync(category.Id, contact.Id);
+                    }
+                    //add the selected categories
+                    foreach (int categoryId in CategoryList)
+                    {
+                        await _addressBookService.AddContactToCategoryAsync(categoryId, contact.Id);
+                    }
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -212,9 +342,10 @@ namespace YellowBook.Controllers
                 return NotFound();
             }
 
+            string appUserId = _userManager.GetUserId(User);
+
             var contact = await _context.Contacts
-                .Include(c => c.AppUser)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                                .FirstOrDefaultAsync(c => c.Id == id && c.AppUserId == appUserId);
             if (contact == null)
             {
                 return NotFound();
@@ -228,23 +359,24 @@ namespace YellowBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Contacts == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Contacts'  is null.");
-            }
-            var contact = await _context.Contacts.FindAsync(id);
+
+            string appUserId = _userManager.GetUserId(User);
+
+            var contact = await _context.Contacts.FirstOrDefaultAsync(c => c.Id == id && c.AppUserId == appUserId);
+
             if (contact != null)
             {
                 _context.Contacts.Remove(contact);
+                await _context.SaveChangesAsync();
             }
+
             
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ContactExists(int id)
         {
-          return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Contacts?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

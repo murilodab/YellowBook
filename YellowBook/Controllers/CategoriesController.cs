@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using YellowBook.Data;
 using YellowBook.Models;
+using YellowBook.Models.ViewModels;
 
 namespace YellowBook.Controllers
 {
@@ -16,17 +17,27 @@ namespace YellowBook.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public CategoriesController(ApplicationDbContext context)
+        private readonly UserManager<AppUser> _userManager;
+
+        public CategoriesController(ApplicationDbContext context,
+                                    UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Categories
         [Authorize]
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Categories.Include(c => c.AppUser);
-            return View(await applicationDbContext.ToListAsync());
+            string appUserId = _userManager.GetUserId(User);
+
+            var categories = await _context.Categories.Where(c => c.AppUserId == appUserId)
+                                                .Include(c => c.AppUser)
+                                                .ToListAsync();
+            
+            
+            return View(categories);
         }
 
         // GET: Categories/Details/5

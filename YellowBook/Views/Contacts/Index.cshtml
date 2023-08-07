@@ -5,6 +5,7 @@
 
 @{
     ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutContacts.cshtml";
 }
 
 <h1>My Contacts</h1>
@@ -35,13 +36,15 @@
     </div>
     <div class="col-12 col-md-8">
         <div class="row row-cols-1 g-3">
-            @foreach(var contact in Model)
+            @foreach (var contact in Model)
             {
                 <div class="col">
                     <div class="card mb-3">
                         <div class="row g-0">
                             <div class="col-md-4 square-img-container">
+                               
                                 <img src="@ImageService.ConvertByteArrayToFile(contact.ImageData!,contact.ImageType!)" class="square-img rounded-start">
+
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
@@ -59,7 +62,7 @@
                                     </div>
                                     <div class="fs-4">
                                         <a class="me-3 editIcons" asp-action="Edit" asp-route-id="@contact.Id"><i class="bi bi-pencil-fill "></i></a>
-                                        <a class="me-3 editIcons" href="#"><i class="bi bi-envelope-fill "></i></a>
+                                        <a class="me-3 editIcons" asp-action="EmailContact" asp-route-contactId="@contact.Id"><i class="bi bi-envelope-fill "></i></a>
                                         <a class="me-3 editIcons" asp-action="Delete" asp-route-id="@contact.Id"><i class="bi bi-trash-fill text-danger"></i></a>
                                     </div>
                                 </div>
@@ -67,9 +70,32 @@
                         </div>
                     </div>
                 </div>
-                
+
             }
-            
+
         </div>
     </div>
 </div>
+
+@section scripts{
+    <!--Sweet Alerts-->
+    <script>
+        let message = '@(ViewBag.SwalMessage)';
+
+        if (!message.includes("Error") && message != '') {
+            Swal.fire({
+                backdrop: false,
+                icon: 'success',
+                title: message,
+                showConfirmButton: true
+            })
+        } else if (message.includes("Error")) {
+            Swal.fire({
+                backdrop: false,
+                icon: 'error',
+                title: 'Oops...',
+                text: message
+            })
+        }
+    </script>
+    }

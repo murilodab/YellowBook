@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using YellowBook.Data;
 using YellowBook.Models;
@@ -28,8 +29,10 @@ builder.Services.AddRazorPages()
 //Custom Services
 
 builder.Services.AddScoped<IImageService, ImageService>();
-
 builder.Services.AddScoped<IAddressBookService, AddressBookService>();
+builder.Services.AddScoped<IEmailSender, EmailService>();
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 var app = builder.Build();
 
