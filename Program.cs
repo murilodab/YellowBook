@@ -6,9 +6,12 @@ using YellowBook.Helpers;
 using YellowBook.Models;
 using YellowBook.Services;
 using YellowBook.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Google;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 
 
@@ -16,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 //var connectionString = builder.Configuration.GetSection("pgSettings")["pgConnection"];
 var connectionString = ConnectionHelper.GetConnectionString(builder.Configuration);
+var services = builder.Services;
+var configuration = builder.Configuration;
 
 
 
@@ -31,6 +36,12 @@ builder.Services.AddRazorPages()
     .AddRazorRuntimeCompilation();
 
 //Custom Services
+
+services.AddAuthentication().AddGoogle(googleOptions =>
+{
+    googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
+    googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+});
 
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAddressBookService, AddressBookService>();
