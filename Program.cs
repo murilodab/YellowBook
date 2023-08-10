@@ -19,9 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 //var connectionString = builder.Configuration.GetSection("pgSettings")["pgConnection"];
 var connectionString = ConnectionHelper.GetConnectionString(builder.Configuration);
-var services = builder.Services;
-var configuration = builder.Configuration;
-
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -35,21 +32,19 @@ builder.Services.AddRazorPages()
     .AddRazorRuntimeCompilation();
 
 //Custom Services
-
-
-
-
-
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAddressBookService, AddressBookService>();
 builder.Services.AddScoped<IEmailSender, EmailService>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
-services.AddAuthentication().AddGoogle(googleOptions =>
+
+builder.Services.AddAuthentication().AddGoogle(googleOptions =>
 {
-    googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
-    googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+    googleOptions.ClientId = builder.Configuration.GetSection("Authentication:Google")["ClientId"];
+    googleOptions.ClientSecret = builder.Configuration.GetSection("Authentication:Google")["ClientSecret"];
 });
+
+
 var app = builder.Build();
 var scope = app.Services.CreateScope();
 
