@@ -11,6 +11,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Include="wwwroot\googlee16cdefda8418a40.html" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.19" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.20" />
