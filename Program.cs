@@ -29,17 +29,6 @@ builder.Services.AddRazorPages()
 
 //Custom Services
 
-var services = builder.Services;
-var configuration = builder.Configuration;
-
-services.AddAuthentication().AddGoogle(googleOptions =>
-{
-    googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
-    googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-});
-
-
-
 
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAddressBookService, AddressBookService>();
