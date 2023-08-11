@@ -5,7 +5,7 @@
 }
 
 
-<script src="https://accounts.google.com/gsi/client" async></script>
+
 <div class="row d-flex justify-content-center">
 
     <div class="col-md-6">
@@ -43,7 +43,7 @@
             <div id="g_id_onload"
                  data-client_id="811243903043-kdgq2270r7tj3m131ua55ii589qhf010.apps.googleusercontent.com"
                  data-context="signup"
-                 data-ux_mode="popup"
+                 data-ux_mode="redirect"
                  data-login_uri="https://yellowlist.up.railway.app/Identity/Account/Register"
                  data-auto_prompt="false">
             </div>
@@ -52,10 +52,9 @@
                  data-type="standard"
                  data-shape="rectangular"
                  data-theme="filled_black"
-                 data-text="signup_with"
+                 data-text="signin_with"
                  data-size="large"
-                 data-logo_alignment="left"
-                 data-width="400">
+                 data-logo_alignment="left">
             </div>
         </form>
     </div>
@@ -64,5 +63,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://accounts.google.com/gsi/client" async></script>
    
 }

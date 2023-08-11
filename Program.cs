@@ -7,11 +7,7 @@ using YellowBook.Models;
 using YellowBook.Services;
 using YellowBook.Services.Interfaces;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 
 
@@ -32,18 +28,24 @@ builder.Services.AddRazorPages()
     .AddRazorRuntimeCompilation();
 
 //Custom Services
+
+var services = builder.Services;
+var configuration = builder.Configuration;
+
+services.AddAuthentication().AddGoogle(googleOptions =>
+{
+    googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
+    googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+});
+
+
+
+
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAddressBookService, AddressBookService>();
 builder.Services.AddScoped<IEmailSender, EmailService>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
-
-builder.Services.AddAuthentication().AddGoogle(googleOptions =>
-{
-    googleOptions.ClientId = builder.Configuration.GetSection("Authentication:Google")["ClientId"];
-    googleOptions.ClientSecret = builder.Configuration.GetSection("Authentication:Google")["ClientSecret"];
-});
-
 
 var app = builder.Build();
 var scope = app.Services.CreateScope();
