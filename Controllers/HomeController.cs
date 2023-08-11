@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using YellowBook.Models;
+using YellowBook.Areas.Identity.Pages.Account;
+using YellowBook.Models.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace YellowBook.Controllers
 {
@@ -22,6 +26,7 @@ namespace YellowBook.Controllers
         {
             return View();
         }
+
 
         [Route("/Home/HandleError/{code:int}")]
         public IActionResult HandleError(int code)

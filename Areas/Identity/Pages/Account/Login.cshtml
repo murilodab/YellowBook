@@ -34,6 +34,7 @@
                 <div>
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-dark mb-2">Log in</button>
                 </div>             
+              
                 <div>
                     <p>
                         <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
@@ -53,5 +54,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="https://accounts.google.com/gsi/client" async></script>
    
 }
