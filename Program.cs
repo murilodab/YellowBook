@@ -17,7 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = ConnectionHelper.GetConnectionString(builder.Configuration);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString,
+    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true)
